@@ -1,0 +1,15 @@
+# Ignore diretórios de build do .NET
+bin/
+obj/
+
+# Ignorar arquivos temporários e de build
+*.log
+*.tmp
+*.bak
+*.swp
+*.DS_Store
+*.vscode/
+*.idea/
+
+# Ignorar o arquivo de configuração do Visual Studio
+.vs/
