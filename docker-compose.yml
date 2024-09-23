@@ -1,0 +1,62 @@
+version: '3.8'
+
+volumes:
+  postgres_data:
+  pgadmin_data:
+  
+networks:
+  project-network:
+    name: project-network
+    driver: bridge
+
+services:
+
+  # Serviço PostgreSQL
+  postgres-db:
+    container_name: postgres-db
+    image: postgres
+    environment:
+      POSTGRES_USER: 'postgres'
+      POSTGRES_PASSWORD: 'admin'
+      POSTGRES_DB: 'ProjectManagementDb'
+    healthcheck:
+      test: ["CMD", "pg_isready"]
+      interval: 3s
+      timeout: 5s
+      retries: 5
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./sql/create_tables.sql:/docker-entrypoint-initdb.d/create_tables.sql
+    networks:
+      - project-network
+
+  # Serviço pgAdmin
+  pgadmin-web:
+    container_name: pgadmin-web
+    image: dpage/pgadmin4
+    environment:
+      PGADMIN_DEFAULT_EMAIL: 'admin@admin.com'
+      PGADMIN_DEFAULT_PASSWORD: 'admin'
+    ports:
+      - "5050:80"
+    depends_on:
+      - postgres-db
+    networks:
+      - project-network
+    volumes:
+      - pgadmin_data:/var/lib/pgadmin
+
+  # Serviço Web API
+  api:
+    container_name: api
+    build:
+      context: .
+      dockerfile: ProjectManagementAPI/Dockerfile
+    ports:
+      - "5000:80"
+    depends_on:
+      - postgres-db
+    networks:
+      - project-network
